@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import NavbarAdmin from '../Pages/NavbarAdmin';
 import { getFirestore, collection, query, getDocs, deleteDoc, updateDoc, doc } from 'firebase/firestore';
-
+import Modal from 'react-modal'; 
 function ProductDetail() {
   const [products, setProducts] = useState([]);
-
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState(null);
   // Reference to the Firestore collection
   const db = getFirestore();
   const productsCollection = collection(db, 'products');
@@ -31,26 +32,46 @@ function ProductDetail() {
   const deleteProduct = async (productId) => {
     try {
       // Delete the product document from Firestore
-      await deleteDoc(doc(collection(db, 'products'), productId));
+      await deleteDoc(doc(collection(db, 'products'), '0k2ODUUO'));
       // Update the local state by filtering out the deleted product
       setProducts((prevProducts) => prevProducts.filter((product) => product.id !== productId));
     } catch (error) {
       console.error('Error deleting product: ', error);
     }
   };
+  const openEditModal = (product) => {
+    setProductToEdit(product);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      // Update the Firestore document
+      await handleEditProduct(productToEdit.id, {
+        title: productToEdit.title,
+        price: productToEdit.price,
+        description: productToEdit.description,
+      });
+  
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error('Error saving edit: ', error);
+    }
+  };
 
   const handleEditProduct = async (productId, updatedData) => {
     try {
-      // Update the product document in Firestore
-      await updateDoc(doc(productsCollection, productId), updatedData);
-      // Update the local state with the updated product data
+      await updateDoc(doc(productsCollection, '0k2ODUUO'), updatedData);
       setProducts((prevProducts) =>
-        prevProducts.map((product) => (product.id === productId ? { ...product, ...updatedData } : product))
+        prevProducts.map((product) =>
+          product.id === productId ? { ...product, ...updatedData } : product
+        )
       );
     } catch (error) {
       console.error('Error updating product: ', error);
     }
   };
+
 
   return (
     <div>
@@ -70,16 +91,86 @@ function ProductDetail() {
             </button>
             
             <button
-          onClick={() => handleEditProduct(product)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded"
-        >
-          Edit
-        </button>
+              onClick={() => openEditModal(product)}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded"
+            >
+              Edit
+            </button>
           </li>
         ))}
       </ul>
+
+      <Modal
+        isOpen={isEditModalOpen}
+        onRequestClose={() => setIsEditModalOpen(false)}
+        contentLabel="Edit Product"
+        ariaHideApp={false} // Opt-out, but not recommended
+      >
+        <h2 className="text-2xl font-bold mb-4">Edit Product</h2>
+        {productToEdit && (
+          <form>ss
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
+                Title
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="title"
+                type="text"
+                placeholder="Title"
+                value={productToEdit.title}
+                onChange={(e) => setProductToEdit({ ...productToEdit, title: e.target.value })}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
+                Price
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="price"
+                type="number"
+                placeholder="Price"
+                value={productToEdit.price}
+                onChange={(e) => setProductToEdit({ ...productToEdit, price: e.target.value })}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
+                Description
+              </label>
+              <textarea
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="description"
+                placeholder="Description"
+                value={productToEdit.description}
+                onChange={(e) => setProductToEdit({ ...productToEdit, description: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+                type="button"
+                onClick={handleSaveEdit}
+              >
+                Save
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded"
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </div>
   );
 }
 
 export default ProductDetail;
+
+
+
