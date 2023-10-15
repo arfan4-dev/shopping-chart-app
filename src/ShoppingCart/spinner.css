@@ -1,0 +1,25 @@
+.spinner {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: conic-gradient(#0000 10%,#474bff);
+    -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 9px),#000 0);
+    animation: spinner-zp9dbg 1s infinite linear;
+    margin: 350px auto;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+ }
+ 
+ @keyframes spinner-zp9dbg {
+    to {
+       transform: rotate(1turn);
+    }
+ }
+ .active{
+   color:cyan;
+ }
+ #product{
+   box-shadow: rgba(0, 0, 0, 0.4) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+ }
